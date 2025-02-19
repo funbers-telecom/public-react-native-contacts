@@ -61,17 +61,26 @@ RCT_EXPORT_METHOD(checkPermission:(RCTPromiseResolveBlock) resolve
 {
     CNAuthorizationStatus authStatus = [CNContactStore authorizationStatusForEntityType:CNEntityTypeContacts];
 
-    if (authStatus == CNAuthorizationStatusDenied || authStatus == CNAuthorizationStatusRestricted){
-        resolve(@"denied");
-    } else if (authStatus == CNAuthorizationStatusAuthorized){
-        resolve(@"authorized");
-    } else if(@available(iOS 18, *)) {
-        if (authStatus == CNAuthorizationStatusLimited) {
-            resolve(@"limited");
+        if (authStatus == CNAuthorizationStatusDenied ||
+            authStatus == CNAuthorizationStatusRestricted ||
+            authStatus == CNAuthorizationStatusNotDetermined) {
+            resolve(@"denied");
+            return;
         }
-    } else {
+
+        if (authStatus == CNAuthorizationStatusAuthorized) {
+            resolve(@"authorized");
+            return;
+        }
+
+        if(@available(iOS 18, *)) {
+           if (authStatus == CNAuthorizationStatusLimited) {
+               resolve(@"limited");
+               return;
+            }
+        }
+
         resolve(@"undefined");
-    }
 }
 
 RCT_EXPORT_METHOD(requestPermission:(RCTPromiseResolveBlock) resolve rejecter:(RCTPromiseRejectBlock) __unused reject)
